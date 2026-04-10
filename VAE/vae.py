@@ -87,7 +87,24 @@ class CVAE(nn.Module):
         ############################################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-        pass
+        self.hidden_dim = 400
+        side = int(self.input_size**0.5)
+        
+        self.encoder = nn.Sequential(
+            nn.Linear(self.input_size + self.num_classes, self.hidden_dim),
+            nn.ReLU(),
+        )
+        
+        self.mu_layer = nn.Linear(self.hidden_dim, self.latent_size)
+        self.logvar_layer = nn.Linear(self.hidden_dim, self.latent_size)
+        
+        self.decoder = nn.Sequential(
+            nn.Linear(self.latent_size + self.num_classes, self.hidden_dim),
+            nn.ReLU(),
+            nn.Linear(self.hidden_dim, self.input_size),
+            nn.Sigmoid(),
+            nn.Unflatten(1, (1, side, side)),
+        )
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         ############################################################################################
