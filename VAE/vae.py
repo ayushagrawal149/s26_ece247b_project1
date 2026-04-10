@@ -135,7 +135,18 @@ class CVAE(nn.Module):
         ############################################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-        pass
+        x_flattened = x.view(x.size(0), -1)
+        encoder_input = torch.cat((x_flattened, labels), dim=1)
+        
+        hidden = self.encoder(encoder_input)
+        
+        mu = self.mu_layer(hidden)
+        logvar = self.logvar_layer(hidden)
+        
+        z = reparametrize(mu, logvar)
+        decoder_input = torch.cat((z, labels), dim=1)
+        
+        x_hat = self.decoder(decoder_input)
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         ############################################################################################
@@ -165,7 +176,8 @@ def reparametrize(mu: Tensor, logvar: Tensor) -> Tensor:
     z = None
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-    pass
+    epsilon = torch.randn_like(mu)
+    z = mu + torch.exp(0.5 * logvar) * epsilon
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     return z
