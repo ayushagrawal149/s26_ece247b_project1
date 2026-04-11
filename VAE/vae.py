@@ -208,7 +208,13 @@ def loss_function(x_hat: Tensor, x: Tensor, mu: Tensor, logvar: Tensor) -> Tenso
     loss = None
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-    pass
+    batch_size = mu.shape[0]
+    
+    reconstruction_loss = F.binary_cross_entropy(x_hat, x, reduction='sum')
+    
+    kl_divergence = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
+    
+    loss = (reconstruction_loss + kl_divergence) / batch_size
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     return loss
