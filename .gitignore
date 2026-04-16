@@ -1,3 +1,10 @@
 # Windows Zone Identifier files
 *:Zone.Identifier
-.DS_Store
+
+*.pyc
+*.gz
+*-ubyte
+
+
+
+
