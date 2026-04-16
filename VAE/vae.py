@@ -115,7 +115,24 @@ class CVAE(nn.Module):
         ############################################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-        pass
+        self.hidden_dim = 400
+        side = int(self.input_size**0.5)
+        
+        self.encoder = nn.Sequential(
+            nn.Linear(self.input_size + self.num_classes, self.hidden_dim),
+            nn.ReLU(),
+        )
+        
+        self.mu_layer = nn.Linear(self.hidden_dim, self.latent_size)
+        self.logvar_layer = nn.Linear(self.hidden_dim, self.latent_size)
+        
+        self.decoder = nn.Sequential(
+            nn.Linear(self.latent_size + self.num_classes, self.hidden_dim),
+            nn.ReLU(),
+            nn.Linear(self.hidden_dim, self.input_size),
+            nn.Sigmoid(),
+            nn.Unflatten(1, (1, side, side)),
+        )
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         ############################################################################################
@@ -146,7 +163,18 @@ class CVAE(nn.Module):
         ############################################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-        pass
+        x_flattened = x.view(x.size(0), -1)
+        encoder_input = torch.cat((x_flattened, labels), dim=1)
+        
+        hidden = self.encoder(encoder_input)
+        
+        mu = self.mu_layer(hidden)
+        logvar = self.logvar_layer(hidden)
+        
+        z = reparametrize(mu, logvar)
+        decoder_input = torch.cat((z, labels), dim=1)
+        
+        x_hat = self.decoder(decoder_input)
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         ############################################################################################
@@ -209,9 +237,14 @@ def loss_function(x_hat: Tensor, x: Tensor, mu: Tensor, logvar: Tensor) -> Tenso
     loss = None
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
+    batch_size = mu.shape[0]
+    
     reconstruction_loss = F.binary_cross_entropy(x_hat, x, reduction='sum')
+    
     kl_divergence = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
-    loss = (reconstruction_loss + kl_divergence) / mu.shape[0]
+    
+    loss = (reconstruction_loss + kl_divergence) / batch_size
+    
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     return loss

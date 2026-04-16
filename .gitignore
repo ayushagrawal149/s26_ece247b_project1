@@ -1,2 +1,10 @@
 # Windows Zone Identifier files
 *:Zone.Identifier
+
+*.pyc
+*.gz
+*-ubyte
+
+
+
+
