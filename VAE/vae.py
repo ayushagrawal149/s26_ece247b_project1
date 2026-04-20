@@ -121,6 +121,10 @@ class CVAE(nn.Module):
         self.encoder = nn.Sequential(
             nn.Linear(self.input_size + self.num_classes, self.hidden_dim),
             nn.ReLU(),
+            nn.Linear(self.hidden_dim, self.hidden_dim),
+            nn.ReLU(),
+            nn.Linear(self.hidden_dim, self.hidden_dim),
+            nn.ReLU()
         )
         
         self.mu_layer = nn.Linear(self.hidden_dim, self.latent_size)
@@ -129,9 +133,13 @@ class CVAE(nn.Module):
         self.decoder = nn.Sequential(
             nn.Linear(self.latent_size + self.num_classes, self.hidden_dim),
             nn.ReLU(),
+            nn.Linear(self.hidden_dim, self.hidden_dim),
+            nn.ReLU(),
+            nn.Linear(self.hidden_dim, self.hidden_dim),
+            nn.ReLU(),
             nn.Linear(self.hidden_dim, self.input_size),
             nn.Sigmoid(),
-            nn.Unflatten(1, (1, side, side)),
+            nn.Unflatten(1, (1, 28, 28)),
         )
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
